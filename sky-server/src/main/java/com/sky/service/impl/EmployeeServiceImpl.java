@@ -1,17 +1,22 @@
 package com.sky.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
+import com.sky.result.PageResult;
 import com.sky.service.EmployeeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,8 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
+@Slf4j
 public class EmployeeServiceImpl implements EmployeeService {
 
     @Autowired
@@ -34,7 +41,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Transactional
     public void save(EmployeeDTO employeeDTO) {
-        System.out.println("当前的id是"+ Thread.currentThread().getId());
+        System.out.println("当前的id是" + Thread.currentThread().getId());
         Employee employee = new Employee();
         //属性拷贝
         BeanUtils.copyProperties(employeeDTO, employee);
@@ -85,6 +92,63 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         //3、返回实体对象
         return employee;
+    }
+
+    /**
+     * 启用禁用员工账号
+     *
+     * @param status
+     * @param id
+     */
+    @Override
+    public void StartOrStop(Integer status, long id) {
+        //Employee employee = new Employee();第一种写法
+        //employee.setStatus(status);
+        //employee.setId(id);
+        Employee employee = Employee.builder()
+                .status(status)
+                .id(id)
+                .build();
+        employeeMapper.update(employee);
+    }
+
+    /**
+     * 根据id搜索员工
+     * @param id
+     * @return
+     */
+    @Override
+    public Employee getById(Long id) {
+        Employee employee = employeeMapper.getById(id);
+        employee.setPassword("****");
+        return employee;
+    }
+
+    @Override
+    public void update(EmployeeDTO employeeDTO) {
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO,employee);
+        employee.setCreateTime(LocalDateTime.now());
+        employee.setCreateUser(BaseContext.getCurrentId());
+        employeeMapper.update(employee);
+
+    }
+
+    public PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
+        log.info("分页查询参数：page={}, pageSize={}, name={}",
+                employeePageQueryDTO.getPage(),
+                employeePageQueryDTO.getPageSize(),
+                employeePageQueryDTO.getName());
+
+        PageHelper.startPage(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
+        Page<Employee> page = employeeMapper.pageQuery(employeePageQueryDTO);
+
+        long total = page.getTotal();
+        List<Employee> records = page.getResult();
+
+        log.info("查询结果：total={}, records.size={}", total, records.size());
+
+        return new PageResult(total, records);
     }
 
 
