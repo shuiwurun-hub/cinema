@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sky.mapper.TicketMapper">
+
+    <insert id="insert" parameterType="Ticket" useGeneratedKeys="true" keyProperty="id">
+        insert into ticket (number, status, user_id, schedule_id, order_time, pay_time, pay_method, pay_status, amount, remark, user_name, phone, cancel_reason, cancel_time, create_time, update_time)
+        values (#{number}, #{status}, #{userId}, #{scheduleId}, #{orderTime}, #{payTime}, #{payMethod}, #{payStatus}, #{amount}, #{remark}, #{userName}, #{phone}, #{cancelReason}, #{cancelTime}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="update" parameterType="Ticket">
+        update ticket
+        <set>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="orderTime != null">
+                order_time = #{orderTime},
+            </if>
+            <if test="payTime != null">
+                pay_time = #{payTime},
+            </if>
+            <if test="payMethod != null">
+                pay_method = #{payMethod},
+            </if>
+            <if test="payStatus != null">
+                pay_status = #{payStatus},
+            </if>
+            <if test="amount != null">
+                amount = #{amount},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark = #{remark},
+            </if>
+            <if test="userName != null and userName != ''">
+                user_name = #{userName},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone = #{phone},
+            </if>
+            <if test="cancelReason != null and cancelReason != ''">
+                cancel_reason = #{cancelReason},
+            </if>
+            <if test="cancelTime != null">
+                cancel_time = #{cancelTime},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from ticket where id = #{id}
+    </delete>
+
+    <select id="getById" resultType="Ticket">
+        select * from ticket where id = #{id}
+    </select>
+
+    <select id="getVOById" resultType="com.sky.vo.TicketVO">
+        select t.*,
+               m.name as movie_name,
+               c.name as cinema_name,
+               h.name as hall_name,
+               s.show_date,
+               s.show_time
+        from ticket t
+        left join schedule s on t.schedule_id = s.id
+        left join movie m on s.movie_id = m.id
+        left join cinema c on s.cinema_id = c.id
+        left join hall h on s.hall_id = h.id
+        where t.id = #{id}
+    </select>
+
+    <select id="pageQuery" resultType="com.sky.vo.TicketVO">
+        select t.*,
+               m.name as movie_name,
+               c.name as cinema_name,
+               h.name as hall_name,
+               s.show_date,
+               s.show_time
+        from ticket t
+        left join schedule s on t.schedule_id = s.id
+        left join movie m on s.movie_id = m.id
+        left join cinema c on s.cinema_id = c.id
+        left join hall h on s.hall_id = h.id
+        <where>
+            <if test="number != null and number != ''">
+                and t.number like concat('%', #{number}, '%')
+            </if>
+            <if test="status != null">
+                and t.status = #{status}
+            </if>
+            <if test="userId != null">
+                and t.user_id = #{userId}
+            </if>
+            <if test="beginTime != null">
+                and t.order_time &gt;= #{beginTime}
+            </if>
+            <if test="endTime != null">
+                and t.order_time &lt;= #{endTime}
+            </if>
+        </where>
+        order by t.order_time desc
+    </select>
+
+</mapper>

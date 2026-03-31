@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sky.mapper.TicketDetailMapper">
+
+    <insert id="insert" parameterType="TicketDetail" useGeneratedKeys="true" keyProperty="id">
+        insert into ticket_detail (ticket_id, seat_id, price, row_num, col_num, seat_type)
+        values (#{ticketId}, #{seatId}, #{price}, #{rowNum}, #{colNum}, #{seatType})
+    </insert>
+
+    <delete id="deleteByTicketId">
+        delete from ticket_detail where ticket_id = #{ticketId}
+    </delete>
+
+</mapper>

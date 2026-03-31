@@ -1,0 +1,21 @@
+sky:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: localhost
+    port: 3306
+    database: cinema_ticketing
+    username: root
+    password: 1919810
+  alioss:
+    endpoint: oss-cn-chengdu.aliyuncs.com
+    access-key-id: LTAI5tKPNkMjs7rNfeF8gh5q
+    access-key-secret: KBECatOPTpPdFfvOoK72KiQWTOYSdq
+    bucket-name: skytakeoutfly
+  redis:
+    host: localhost
+    port: 6379
+    password: 123456
+    database: 1
+  wechat:
+    appid: wx7b9940433b94f51f
+    secret: 73e2a5bb8dc15cd21d6eba016aa0fbd8

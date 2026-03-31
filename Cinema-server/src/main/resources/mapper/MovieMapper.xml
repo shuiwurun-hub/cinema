@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sky.mapper.MovieMapper">
+
+    <insert id="insert" parameterType="Movie" useGeneratedKeys="true" keyProperty="id">
+        insert into movie (name, category_id, price, image, description, duration, director, actors, release_date, status, create_time, update_time, create_user, update_user)
+        values (#{name}, #{categoryId}, #{price}, #{image}, #{description}, #{duration}, #{director}, #{actors}, #{releaseDate}, #{status}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+    </insert>
+
+    <update id="update" parameterType="Movie">
+        update movie
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="categoryId != null">
+                category_id = #{categoryId},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <if test="image != null and image != ''">
+                image = #{image},
+            </if>
+            <if test="description != null and description != ''">
+                description = #{description},
+            </if>
+            <if test="duration != null">
+                duration = #{duration},
+            </if>
+            <if test="director != null and director != ''">
+                director = #{director},
+            </if>
+            <if test="actors != null and actors != ''">
+                actors = #{actors},
+            </if>
+            <if test="releaseDate != null">
+                release_date = #{releaseDate},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="updateUser != null">
+                update_user = #{updateUser},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from movie where id = #{id}
+    </delete>
+
+    <select id="getById" resultType="Movie">
+        select * from movie where id = #{id}
+    </select>
+
+    <select id="pageQuery" resultType="com.sky.vo.MovieVO">
+        select m.*, c.name as category_name
+        from movie m
+        left join category c on m.category_id = c.id
+        <where>
+            <if test="name != null and name != ''">
+                and m.name like concat('%', #{name}, '%')
+            </if>
+            <if test="categoryId != null">
+                and m.category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                and m.status = #{status}
+            </if>
+        </where>
+        order by m.create_time desc
+    </select>
+
+</mapper>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sky.mapper.CinemaMapper">
+
+    <insert id="insert" parameterType="Cinema" useGeneratedKeys="true" keyProperty="id">
+        insert into cinema (name, address, phone, image, description, status, create_time, update_time, create_user, update_user)
+        values (#{name}, #{address}, #{phone}, #{image}, #{description}, #{status}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+    </insert>
+
+    <update id="update" parameterType="Cinema">
+        update cinema
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="address != null and address != ''">
+                address = #{address},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone = #{phone},
+            </if>
+            <if test="image != null and image != ''">
+                image = #{image},
+            </if>
+            <if test="description != null and description != ''">
+                description = #{description},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="updateUser != null">
+                update_user = #{updateUser},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from cinema where id = #{id}
+    </delete>
+
+    <select id="getById" resultType="Cinema">
+        select * from cinema where id = #{id}
+    </select>
+
+    <select id="list" resultType="com.sky.vo.CinemaVO">
+        select * from cinema order by create_time desc
+    </select>
+
+</mapper>

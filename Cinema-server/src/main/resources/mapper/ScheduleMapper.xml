@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sky.mapper.ScheduleMapper">
+
+    <insert id="insert" parameterType="Schedule" useGeneratedKeys="true" keyProperty="id">
+        insert into schedule (movie_id, cinema_id, hall_id, show_date, show_time, end_time, price, status, create_time, update_time, create_user, update_user)
+        values (#{movieId}, #{cinemaId}, #{hallId}, #{showDate}, #{showTime}, #{endTime}, #{price}, #{status}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
+    </insert>
+
+    <update id="update" parameterType="Schedule">
+        update schedule
+        <set>
+            <if test="movieId != null">
+                movie_id = #{movieId},
+            </if>
+            <if test="cinemaId != null">
+                cinema_id = #{cinemaId},
+            </if>
+            <if test="hallId != null">
+                hall_id = #{hallId},
+            </if>
+            <if test="showDate != null">
+                show_date = #{showDate},
+            </if>
+            <if test="showTime != null">
+                show_time = #{showTime},
+            </if>
+            <if test="endTime != null">
+                end_time = #{endTime},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="updateUser != null">
+                update_user = #{updateUser},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from schedule where id = #{id}
+    </delete>
+
+    <select id="getById" resultType="Schedule">
+        select * from schedule where id = #{id}
+    </select>
+
+    <select id="getVOById" resultType="com.sky.vo.ScheduleVO">
+        select s.*,
+               m.name as movie_name,
+               m.image as movie_image,
+               c.name as cinema_name,
+               h.name as hall_name,
+               (h.total_seats - (select count(*) from ticket_detail td
+                                  join ticket t on td.ticket_id = t.id
+                                  where t.schedule_id = s.id and t.status != 3)) as available_seats
+        from schedule s
+        left join movie m on s.movie_id = m.id
+        left join cinema c on s.cinema_id = c.id
+        left join hall h on s.hall_id = h.id
+        where s.id = #{id}
+    </select>
+
+</mapper>
