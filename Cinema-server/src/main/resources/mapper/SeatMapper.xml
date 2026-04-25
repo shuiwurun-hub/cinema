@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cinema.mapper.SeatMapper">
+
+    <insert id="insert" parameterType="com.cinema.entity.Seat" useGeneratedKeys="true" keyProperty="id">
+        insert into seat (hall_id, row_num, col_num, seat_type, status)
+        values (#{hallId}, #{rowNum}, #{colNum}, #{seatType}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.cinema.entity.Seat">
+        update seat
+        <set>
+            <if test="hallId != null">hall_id = #{hallId},</if>
+            <if test="rowNum != null">row_num = #{rowNum},</if>
+            <if test="colNum != null">col_num = #{colNum},</if>
+            <if test="seatType != null">seat_type = #{seatType},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        delete from seat where id = #{id}
+    </delete>
+
+    <select id="getById" parameterType="java.lang.Long" resultType="com.cinema.entity.Seat">
+        select * from seat where id = #{id}
+    </select>
+
+</mapper>

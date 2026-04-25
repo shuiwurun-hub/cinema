@@ -2,9 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <!-- SQL方言：MySQL -->
-<mapper namespace="com.sky.mapper.CategoryMapper">
+<mapper namespace="com.cinema.mapper.CategoryMapper">
 
-    <select id="pageQuery" resultType="com.sky.entity.Category">
+    <select id="pageQuery" resultType="com.cinema.entity.Category">
         select * from category
         <where>
             <if test="name != null and name != ''">
@@ -17,7 +17,7 @@
         order by sort asc , create_time desc
     </select>
 
-    <update id="update" parameterType="com.sky.entity.Category">
+    <update id="update" parameterType="com.cinema.entity.Category">
         update category
         <set>
             <if test="type != null">
@@ -42,7 +42,7 @@
         where id = #{id}
     </update>
 
-    <select id="list" resultType="com.sky.entity.Category">
+    <select id="list" resultType="com.cinema.entity.Category">
         select * from category
         <where>
             <if test="type != null">

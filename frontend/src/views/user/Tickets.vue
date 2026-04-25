@@ -27,28 +27,11 @@
         <el-table-column label="操作" width="150">
           <template #default="{ row }">
             <el-button
-              v-if="row.status === 1"
-              type="primary"
-              size="small"
-              @click="handlePay(row)"
-            >
-              支付
-            </el-button>
-            <el-button
-              v-if="row.status === 1"
-              type="danger"
-              size="small"
-              @click="handleCancel(row)"
-            >
-              取消
-            </el-button>
-            <el-button
-              v-else
               type="info"
               size="small"
               @click="handleView(row)"
             >
-              查看
+              查看详情
             </el-button>
           </template>
         </el-table-column>
@@ -87,7 +70,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
 
 const tableData = ref([])
@@ -121,35 +104,6 @@ const getStatusType = (status) => {
     4: 'danger'
   }
   return typeMap[status] || 'info'
-}
-
-const handlePay = async (row) => {
-  try {
-    await request.post(`/user/ticket/pay/${row.id}`)
-    ElMessage.success('支付成功')
-    loadData()
-  } catch (error) {
-    console.error('支付失败:', error)
-  }
-}
-
-const handleCancel = async (row) => {
-  try {
-    await ElMessageBox.confirm('确定要取消该订单吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-    await request.post(`/user/ticket/cancel/${row.id}`, null, {
-      params: { cancelReason: '用户主动取消' }
-    })
-    ElMessage.success('取消成功')
-    loadData()
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('取消失败:', error)
-    }
-  }
 }
 
 const handleView = (row) => {

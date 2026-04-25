@@ -4,11 +4,36 @@
       <template #header>
         <div class="card-header">
           <span>影厅管理</span>
-          <el-button type="primary" @click="handleAdd">新增影厅</el-button>
+          <div class="header-actions">
+            <el-select
+              v-model="selectedCinemaId"
+              placeholder="请先选择影院"
+              style="width: 300px; margin-right: 10px"
+              @change="handleCinemaChange"
+            >
+              <el-option
+                v-for="item in cinemaList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
+            <el-button type="primary" @click="handleAdd" :disabled="!selectedCinemaId">
+              新增影厅
+            </el-button>
+          </div>
         </div>
       </template>
-      
-      <el-table :data="tableData" style="width: 100%">
+
+      <div v-if="!selectedCinemaId" class="empty-state">
+        <el-empty description="请先选择影院">
+          <template #image>
+            <Icon icon="mdi:theater" style="font-size: 80px; color: #ccc" />
+          </template>
+        </el-empty>
+      </div>
+
+      <el-table v-else :data="tableData" style="width: 100%">
         <el-table-column prop="name" label="影厅名称" />
         <el-table-column prop="type" label="影厅类型" />
         <el-table-column prop="rowCount" label="行数" />
@@ -39,32 +64,29 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
-        <el-form-item label="影院" prop="cinemaId">
-          <el-select v-model="form.cinemaId" placeholder="请选择影院">
-            <el-option
-              v-for="item in cinemaList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            />
-          </el-select>
-        </el-form-item>
         <el-form-item label="影厅名称" prop="name">
-          <el-input v-model="form.name" />
+          <el-input v-model="form.name" placeholder="请输入影厅名称，如：1号厅" />
         </el-form-item>
         <el-form-item label="影厅类型" prop="type">
-          <el-select v-model="form.type" placeholder="请选择类型">
+          <el-select v-model="form.type" placeholder="请选择类型" style="width: 100%">
             <el-option label="IMAX" value="IMAX" />
             <el-option label="3D" value="3D" />
             <el-option label="2D" value="2D" />
             <el-option label="4DX" value="4DX" />
+            <el-option label="杜比全景声" value="杜比全景声" />
+            <el-option label="VIP厅" value="VIP厅" />
           </el-select>
         </el-form-item>
         <el-form-item label="行数" prop="rowCount">
-          <el-input-number v-model="form.rowCount" :min="1" />
+          <el-input-number v-model="form.rowCount" :min="1" :max="30" />
+          <span style="margin-left: 10px; color: #999; font-size: 12px">（座位排数）</span>
         </el-form-item>
         <el-form-item label="列数" prop="colCount">
-          <el-input-number v-model="form.colCount" :min="1" />
+          <el-input-number v-model="form.colCount" :min="1" :max="50" />
+          <span style="margin-left: 10px; color: #999; font-size: 12px">（每排座位数）</span>
+        </el-form-item>
+        <el-form-item label="总座位数">
+          <el-tag type="info" size="large">{{ form.rowCount * form.colCount }} 个座位</el-tag>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -76,12 +98,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Icon } from '@iconify/vue'
 import request from '@/utils/request'
 
 const tableData = ref([])
 const cinemaList = ref([])
+const selectedCinemaId = ref(null)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增影厅')
 const formRef = ref()
@@ -90,12 +114,11 @@ const form = ref({
   cinemaId: null,
   name: '',
   type: '',
-  rowCount: 0,
-  colCount: 0
+  rowCount: 10,
+  colCount: 15
 })
 
 const rules = {
-  cinemaId: [{ required: true, message: '请选择影院', trigger: 'change' }],
   name: [{ required: true, message: '请输入影厅名称', trigger: 'blur' }],
   type: [{ required: true, message: '请选择影厅类型', trigger: 'change' }],
   rowCount: [{ required: true, message: '请输入行数', trigger: 'blur' }],
@@ -106,29 +129,49 @@ const loadCinemas = async () => {
   try {
     const res = await request.get('/admin/cinema/list')
     cinemaList.value = res.data
+    if (cinemaList.value.length > 0 && !selectedCinemaId.value) {
+      selectedCinemaId.value = cinemaList.value[0].id
+      loadData()
+    }
   } catch (error) {
     console.error('加载影院列表失败:', error)
   }
 }
 
 const loadData = async () => {
+  if (!selectedCinemaId.value) {
+    tableData.value = []
+    return
+  }
+  
   try {
-    const res = await request.get('/admin/hall/list')
+    const res = await request.get('/admin/hall/list', {
+      params: { cinemaId: selectedCinemaId.value }
+    })
     tableData.value = res.data
   } catch (error) {
     console.error('加载数据失败:', error)
   }
 }
 
+const handleCinemaChange = () => {
+  loadData()
+}
+
 const handleAdd = () => {
+  if (!selectedCinemaId.value) {
+    ElMessage.warning('请先选择影院')
+    return
+  }
+  
   dialogTitle.value = '新增影厅'
   form.value = {
     id: null,
-    cinemaId: null,
+    cinemaId: selectedCinemaId.value,
     name: '',
     type: '',
-    rowCount: 0,
-    colCount: 0
+    rowCount: 10,
+    colCount: 15
   }
   dialogVisible.value = true
 }
@@ -153,7 +196,7 @@ const handleStatus = async (row) => {
 
 const handleDelete = async (row) => {
   try {
-    await ElMessageBox.confirm('确定要删除该影厅吗？', '提示', {
+    await ElMessageBox.confirm('确定要删除该影厅吗？删除后无法恢复！', '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
@@ -171,6 +214,9 @@ const handleDelete = async (row) => {
 const handleSubmit = async () => {
   await formRef.value.validate()
   try {
+    form.value.cinemaId = selectedCinemaId.value
+    form.value.totalSeats = form.value.rowCount * form.value.colCount
+    
     if (form.value.id) {
       await request.put('/admin/hall', form.value)
     } else {
@@ -186,7 +232,6 @@ const handleSubmit = async () => {
 
 onMounted(() => {
   loadCinemas()
-  loadData()
 })
 </script>
 
@@ -199,5 +244,15 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.empty-state {
+  padding: 60px 0;
+  text-align: center;
 }
 </style>

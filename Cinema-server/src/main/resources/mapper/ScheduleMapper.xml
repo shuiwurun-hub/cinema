@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sky.mapper.ScheduleMapper">
+<mapper namespace="com.cinema.mapper.ScheduleMapper">
 
     <insert id="insert" parameterType="Schedule" useGeneratedKeys="true" keyProperty="id">
         insert into schedule (movie_id, cinema_id, hall_id, show_date, show_time, end_time, price, status, create_time, update_time, create_user, update_user)
@@ -53,7 +53,7 @@
         select * from schedule where id = #{id}
     </select>
 
-    <select id="getVOById" resultType="com.sky.vo.ScheduleVO">
+    <select id="getVOById" resultType="com.cinema.vo.ScheduleVO">
         select s.*,
                m.name as movie_name,
                m.image as movie_image,
@@ -67,6 +67,87 @@
         left join cinema c on s.cinema_id = c.id
         left join hall h on s.hall_id = h.id
         where s.id = #{id}
+    </select>
+
+    <select id="listAll" resultType="com.cinema.vo.ScheduleVO">
+        select s.*,
+               m.name as movie_name,
+               m.image as movie_image,
+               c.name as cinema_name,
+               h.name as hall_name,
+               (h.total_seats - (select count(*) from ticket_detail td
+                                  join ticket t on td.ticket_id = t.id
+                                  where t.schedule_id = s.id and t.status != 3)) as available_seats
+        from schedule s
+        left join movie m on s.movie_id = m.id
+        left join cinema c on s.cinema_id = c.id
+        left join hall h on s.hall_id = h.id
+        where s.status = 1
+        order by s.show_date, s.show_time
+    </select>
+
+    <select id="listByMovieId" resultType="com.cinema.vo.ScheduleVO">
+        select s.*,
+               m.name as movie_name,
+               m.image as movie_image,
+               c.name as cinema_name,
+               h.name as hall_name,
+               (h.total_seats - (select count(*) from ticket_detail td
+                                  join ticket t on td.ticket_id = t.id
+                                  where t.schedule_id = s.id and t.status != 3)) as available_seats
+        from schedule s
+        left join movie m on s.movie_id = m.id
+        left join cinema c on s.cinema_id = c.id
+        left join hall h on s.hall_id = h.id
+        where s.movie_id = #{movieId} and s.show_date >= #{date} and s.status = 1
+        order by s.show_date, s.show_time
+    </select>
+
+    <select id="listByCinemaId" resultType="com.cinema.vo.ScheduleVO">
+        select s.*,
+               m.name as movie_name,
+               m.image as movie_image,
+               c.name as cinema_name,
+               h.name as hall_name,
+               (h.total_seats - (select count(*) from ticket_detail td
+                                  join ticket t on td.ticket_id = t.id
+                                  where t.schedule_id = s.id and t.status != 3)) as available_seats
+        from schedule s
+        left join movie m on s.movie_id = m.id
+        left join cinema c on s.cinema_id = c.id
+        left join hall h on s.hall_id = h.id
+        where s.cinema_id = #{cinemaId} and s.show_date >= #{date} and s.status = 1
+        order by s.show_date, s.show_time
+    </select>
+
+    <select id="listWithFilters" resultType="com.cinema.vo.ScheduleVO">
+        select s.*,
+               m.name as movie_name,
+               m.image as movie_image,
+               c.name as cinema_name,
+               c.address as cinema_address,
+               h.name as hall_name,
+               h.total_seats,
+               (h.total_seats - (select count(*) from ticket_detail td
+                                  join ticket t on td.ticket_id = t.id
+                                  where t.schedule_id = s.id and t.status != 3)) as available_seats
+        from schedule s
+        left join movie m on s.movie_id = m.id
+        left join cinema c on s.cinema_id = c.id
+        left join hall h on s.hall_id = h.id
+        <where>
+            s.status = 1
+            <if test="movieId != null">
+                and s.movie_id = #{movieId}
+            </if>
+            <if test="cinemaId != null">
+                and s.cinema_id = #{cinemaId}
+            </if>
+            <if test="showDate != null">
+                and s.show_date = #{showDate}
+            </if>
+        </where>
+        order by s.show_date, s.show_time
     </select>
 
 </mapper>

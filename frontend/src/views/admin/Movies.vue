@@ -105,7 +105,12 @@
           <el-input v-model="form.actors" type="textarea" />
         </el-form-item>
         <el-form-item label="上映日期" prop="releaseDate">
-          <el-date-picker v-model="form.releaseDate" type="date" />
+          <el-date-picker 
+            v-model="form.releaseDate" 
+            type="date" 
+            value-format="YYYY-MM-DD"
+            placeholder="选择上映日期"
+          />
         </el-form-item>
         <el-form-item label="描述" prop="description">
           <el-input v-model="form.description" type="textarea" />

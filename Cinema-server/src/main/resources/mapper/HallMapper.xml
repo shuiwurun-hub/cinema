@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sky.mapper.HallMapper">
+<mapper namespace="com.cinema.mapper.HallMapper">
 
     <insert id="insert" parameterType="Hall" useGeneratedKeys="true" keyProperty="id">
         insert into hall (cinema_id, name, type, row_count, col_count, total_seats, status, create_time, update_time, create_user, update_user)
@@ -50,7 +50,7 @@
         select * from hall where id = #{id}
     </select>
 
-    <select id="getVOById" resultType="com.sky.vo.HallVO">
+    <select id="getVOById" resultType="com.cinema.vo.HallVO">
         select h.*, c.name as cinema_name
         from hall h
         left join cinema c on h.cinema_id = c.id
